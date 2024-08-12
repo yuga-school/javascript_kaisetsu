@@ -1,0 +1,245 @@
+body {
+  font-family: 'Roboto', Arial, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f7fa;
+}
+
+header {
+  background-color: #3498db;
+  color: #fff;
+  padding: 1.5rem 0;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.logo {
+  font-size: 2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.image {
+  width: 80%;
+  margin: auto;
+  display: block;
+}
+
+.container {
+  display: flex;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #fff;
+  box-shadow: 0 0 20px rgba(0,0,0,0.05);
+  border-radius: 8px;
+  margin-top: 2rem;
+}
+
+.sidebar {
+  width: 300px;
+  padding: 2rem;
+  background: linear-gradient(135deg, #139cf7, #139cf7);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+
+main {
+  flex-grow: 1;
+  padding-left: 2rem;
+}
+
+nav h2 {
+  margin-top: 0;
+  color: #ffffff;
+  font-size: 1.8rem;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #ffffff;
+  padding-bottom: 1.0rem;
+}
+
+nav ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+nav ul ul {
+  padding-left: 1.5rem;
+}
+
+nav ul li {
+  margin-bottom: 1rem;
+}
+
+nav ul li a {
+  color: #ecf0f1;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: block;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  background-color: rgba(255,255,255,0.1);
+}
+
+nav ul li a:hover {
+  background-color: rgba(255,255,255,0.2);
+  transform: translateX(5px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+nav ul ul li a {
+  font-size: 0.9rem;
+  padding: 0.3rem 0.8rem;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+nav ul li {
+  animation: fadeIn 0.5s ease forwards;
+  opacity: 0;
+}
+
+nav ul li:nth-child(1) { animation-delay: 0.1s; }
+nav ul li:nth-child(2) { animation-delay: 0.2s; }
+nav ul li:nth-child(3) { animation-delay: 0.3s; }
+nav ul li:nth-child(4) { animation-delay: 0.4s; }
+nav ul li:nth-child(5) { animation-delay: 0.5s; }
+
+/* スクロールバーのカスタマイズ */
+.sidebar {
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.1);
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: rgba(255,255,255,0.3);
+  border-radius: 4px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255,255,255,0.5);
+}
+
+section {
+  margin-bottom: 3rem;
+}
+
+h1, h2, h3 {
+  color: #2c3e50;
+}
+
+h1 {
+  font-size: 2.5rem;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 0.5rem;
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+.code-block {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1.5em;
+  margin: 1.5em 0;
+  position: relative;
+  overflow-x: auto;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.code-block pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.code-block code {
+  font-family: 'Fira Code', 'Courier New', Courier, monospace;
+  font-size: 0.9rem;
+}
+
+.copy-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 8px 15px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.copy-button:hover {
+  background-color: #2980b9;
+}
+
+footer {
+  background-color: #34495e;
+  color: #ecf0f1;
+  text-align: center;
+  padding: 1.5rem 0;
+  margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    padding-right: 0;
+    margin-bottom: 2rem;
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 2rem;
+  }
+
+  main {
+    padding-left: 0;
+  }
+}
+
+.toggle-btn {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  text-align: center;
+  background-color: #3498db;
+  color: white;
+  border-radius: 50%;
+  margin-left: 10px;
+  transition: all 0.3s ease;
+  font-weight: bold;
+}
+
+.toggle-btn:hover {
+  background-color: #2980b9;
+  transform: scale(1.1);
+}

@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.jsを使ったプログラミングについての解説</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">Three.js 技術解説</div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <nav>
+                <h2>目次</h2>
+                <ul>
+                    <li><a href="#introduction">はじめに</a></li>
+                    <li>
+                        <a href="#install">Three.jsの導入方法</a>
+                    </li>
+                    <li>
+                        <a href="#base">基礎</a>
+                        <ul>
+                            <li><a href="#scene">シーンの設定</a></li>
+                            <li><a href="#camera">カメラの設定</a></li>
+                            <li><a href="#renderer">レンダラーの設定</a></li>
+                            <li><a href="#makegeo">ジオメトリの作成</a></li>
+                            <li><a href="#light">光源の追加</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#advanced">応用:3Dテトリスの作成</a>
+                        <ul>
+                            <li><a href="#tetorimino">テトリミノの作成</a></li>
+                            <li><a href="#rotate">テトリミノの回転</a></li>
+                            <li><a href="#color">色の追加</a></li>
+                            <li><a href="#judge">衝突判定</a></li>
+                            <li><a href="#in">ユーザー入力の処理</a></li>
+                            <li><a href="#examples">3Dテトリスの実装例</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#time">本コンテンツの作成時間</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main>
+            <script>
+                function toggleContent(id, button) {
+                    var content = document.getElementById(id);
+                    if (content.style.display === "none") {
+                        content.style.display = "block";
+                        button.textContent = "−";
+                    } else {
+                        content.style.display = "none";
+                        button.textContent = "+";
+                    }
+                }
+                function copyCode(button) {
+                    const codeBlock = button.parentElement;
+                    const code = codeBlock.querySelector('code').innerText;
+                    navigator.clipboard.writeText(code).then(() => {
+                        button.textContent = 'コピーしました！';
+                        setTimeout(() => {
+                            button.textContent = 'コピー';
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('コピーに失敗しました:', err);
+                    });
+                }
+                document.addEventListener('DOMContentLoaded', (event) => {
+                    document.querySelectorAll('pre code').forEach((el) => {
+                        hljs.highlightElement(el);
+                    });
+                });
+            </script>
+            <section id="introduction">
+                <h1>three.jsを使った3Dグラフィックス</h1>
+                <p>本コンテンツでは、three.jsについての説明をして、実際にthree.jsを使ってみる。</p>
+            </section>
+            <section id="install">
+                <h1>Three.jsの導入方法
+                    <span class="toggle-btn" onclick="toggleContent('open1', this)">+</span>
+                </h1>
+                <div id="open1" style="display:none;clear:both;">
+                    <ul>
+                        <h2>cdnを利用する</h2>
+                        <p>cdnを利用すると、ビルドシステムなしでthree.jsを利用することができる。ライブラリを参照するスクリプトは以下のようにtype="module"を使用する必要がある。</p>
+                        <div class="code-block">
+                            <button class="copy-button" onclick="copyCode(this)">コピー</button>
+<pre><code class="language-html">&lt;script type="importmap"&gt;
+{
+    "imports": {
+    "three": 
+"https://cdn.jsdelivr.net/npm/three@&lt;version&gt;/build/three.module.js"
+    }
+}
+&lt;/script&gt;
+                        
+&lt;script type="module"&gt;
+    import * as THREE from 'three';
+
+    const scene = new THREE.Scene();
+&lt;/script&gt;</code></pre>
+                        </div>
+                        <p>これでthree.jsが利用できる。</p>
+                    </ul>
+                </div>
+            </section>
+            <section id="base">
+                <h1>基礎</h1>
+                <article id="scene">
+                    <h2>シーンの設定
+                        <span class="toggle-btn" onclick="toggleContent('open2', this)">+</span>
+                    </h2>
+                    <div id="open2" style="display:none;clear:both;">
+                    <p>シーンは3D空間を表現するコンテナのようなものである。オブジェクト、ライト、カメラなどをシーンに追加する。</p>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">コピー</button>
+<pre><code class="language-javascript">const scene = new THREE.Scene();</code></pre>
+                    </div>
+                    </div>
+                </article>
+                <article id="camera">
+                    <h2>カメラの設定
+                        <span class="toggle-btn" onclick="toggleContent('open3', this)">+</span>
+                    </h2>
+                    <div id="open3" style="display:none;clear:both;">
+                    <p>カメラはシーンをどの角度から見るかを定義する。一般的に使用されるのは遠近法カメラ（PerspectiveCamera）である。</p>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">コピー</button>
+<pre><code class="language-javascript">const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.z = 5;</code></pre>
+                    </div>
+                    </div>
+                </article>
+                <article id="renderer">
+                    <h2>レンダラーの設定
+                        <span class="toggle-btn" onclick="toggleContent('open4', this)">+</span>
+                    </h2>
+                    <div id="open4" style="display:none;clear:both;">
+                    <p>レンダラーはシーンとカメラの情報を使って、3D空間を2D画面に描画する。</p>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">コピー</button>
+<pre><code class="language-javascript">const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);</code></pre>
+                    </div>
+                    </div>
+                </article>
+                <article id="makegeo">
+                    <h2>ジオメトリの作成
+                        <span class="toggle-btn" onclick="toggleContent('open5', this)">+</span>
+                    </h2>
+                    <div id="open5" style="display:none;clear:both;">
+                    <p>ジオメトリは3Dオブジェクトの形状を定義する。例えば、ボックスを作成する場合：</p>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">コピー</button>
+<pre><code class="language-javascript">// ケースの面を作成
+    const caseSize = 460;
+    const blockSize = 46;
+    const caseGeometry = new THREE.BoxGeometry(caseSize+blockSize, caseSize*3/2, caseSize+blockSize);
+    const caseMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffffff, // 面を白に塗る
+      transparent: true,
+      opacity: 0.5 
+    });
+    const caseMesh = new THREE.Mesh(caseGeometry, caseMaterial);
+    scene.add(caseMesh);
+    
+    // ケースのエッジを作成
+    const edgesGeometry = new THREE.EdgesGeometry(caseGeometry); 
+    const edgesMaterial = new THREE.LineBasicMaterial({
+      color: 0x0000ff, 
+      linewidth: 2     
+    });
+    const edgesMesh = new THREE.LineSegments(edgesGeometry, edgesMaterial);
+    scene.add(edgesMesh);</code></pre>
+                    </div>
+                    <p>ボックスを追加したときの図</p>
+                    <img src="case.jpg" class="image"  >
+                    </div>
+                </article>
+                <article id="light">
+                    <h2>光源の追加
+                        <span class="toggle-btn" onclick="toggleContent('open6', this)">+</span>
+                    </h2>
+                    <div id="open6" style="display:none;clear:both;">
+                    <p>光源はシーンに陰影をつけ、より現実的な見た目にする。</p>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">コピー</button>
+<pre><code class="language-javascript">const light = new THREE.PointLight(0xffffff, 1, 100);
+light.position.set(0, 0, 10);
+scene.add(light);</code></pre>
+                    </div>
+                    </div>
+                </article>
+            </section>
+            <section id="advanced">
+                <h1>応用：3Dテトリスの作成</h1>
+                <article id="tetorimino">
+                    <h2>テトリミノの作成
+                        <span class="toggle-btn" onclick="toggleContent('open7', this)">+</span>
+                    </h2>
+                    <div id="open7" style="display:none;clear:both;">
+                    <p>テトリミノは複数の立方体で構成される。各テトリミノの形状を定義し、それをもとに3Dオブジェクトを作成する。</p>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">コピー</button>
+<pre><code class="language-javascript">// テトリミノの形状を定義するデータ配列
+    const blocksData = [];
+    blocksData.push([
+        { position: { x: 0, y: 0, z: 0 } },
+        { position: { x: 1, y: 0, z: 0 } },
+        { position: { x: 2, y: 0, z: 0 } },
+        { position: { x: 3, y: 0, z: 0 } }
+    ]); // I
+    blocksData.push([
+        { position: { x: 0, y: 0, z: 0 } },
+        { position: { x: 1, y: 0, z: 0 } },
+        { position: { x: 0, y: 1, z: 0 } },
+        { position: { x: 1, y: 1, z: 0 } }
+    ]); // O
+    blocksData.push([
+        { position: { x: 0, y: 0, z: 0 } },
+        { position: { x: 1, y: 0, z: 0 } },
+        { position: { x: 2, y: 0, z: 0 } },
+        { position: { x: 1, y: 1, z: 0 } }
+    ]); // T
+    blocksData.push([
+        { position: { x: 0, y: 0, z: 0 } },
+        { position: { x: 1, y: 0, z: 0 } },
+        { position: { x: 2, y: 0, z: 0 } },
+        { position: { x: 0, y: 1, z: 0 } }
+    ]); // L
+    blocksData.push([
+        { position: { x: 0, y: 0, z: 0 } },
+        { position: { x: 1, y: 0, z: 0 } },
+        { position: { x: 2, y: 0, z: 0 } },
+        { position: { x: 2, y: 1, z: 0 } }
+    ]); // J
+    blocksData.push([
+        { position: { x: 1, y: 0, z: 0 } },
+        { position: { x: 2, y: 0, z: 0 } },
+        { position: { x: 0, y: 1, z: 0 } },
+        { position: { x: 1, y: 1, z: 0 } }
+    ]); // S
+    blocksData.push([
+        { position: { x: 0, y: 0, z: 0 } },
+        { position: { x: 1, y: 0, z: 0 } },
+        { position: { x: 1, y: 1, z: 0 } },
+        { position: { x: 2, y: 1, z: 0 } }
+    ]); // Z
+
+    function makeblock() {
+        blocksData[Math.floor(Math.random() * blocksData.length)].forEach(block => { //ランダムな形状を選択
+            const blockGeometry = new THREE.BoxGeometry(blockSize, blockSize, blockSize); //立方体のジオメトリを作成
+            const blockMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 }); //緑色のマテリアルを作成
+            const blockMesh = new THREE.Mesh(blockGeometry, blockMaterial); //立方体のメッシュを作成
+            blockMesh.position.set(block.position.x * blockSize, block.position.y * blockSize, block.position.z * blockSize); //位置を設定
+            tetromino.push(blockMesh); //tetrominoに追加
+            scene.add(blockMesh); //sceneに追加
+        });
+        for (let i = 0; i < tetromino.length; i++) {
+            tetromino[i].position.y += caseSize*3/4+blockSize/2; // テトリミノを初期位置に設定する。
+        }
+      }</code></pre>
+                    </div>
+                    <p>テトリミノを作成したときの図</p>
+                    <img src="tetromino.jpg" class="image">
+                    </div>
+                </article>
+                <article id="rotate">
+                    <h2>テトリミノの回転
+                        <span class="toggle-btn" onclick="toggleContent('open8', this)">+</span>
+                    </h2>
+                    <div id="open8" style="display:none;clear:both;">
+                    <p>3Dテトリスでは、テトリミノをxy平面上における90度の回転と、xz平面上における90度の回転を行うことにした。</p>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">コピー</button>
+            <pre><code class="language-javascript">function rotateTetromino(tetromino, axis) {
+                function rotateTetromino(angle) {
+                    if(angle==1){ //xy平面上の右回転
+                        //回転するときの中心の座標を取得
+                      const Oposx = tetromino[0].position.x;
+                      const Oposy = tetromino[0].position.y;
+                      for (let i = 0; i < tetromino.length; i++) {
+                        #中心との差分を取得
+                        tetromino[i].position.x -= Oposx;
+                        tetromino[i].position.y -= Oposy;
+                        //回転
+                        const posx = tetromino[i].position.x;
+                        tetromino[i].position.x = tetromino[i].position.y;
+                        tetromino[i].position.y = -posx;
+                        //中心との差分を足す
+                        tetromino[i].position.x += bposx;
+                        tetromino[i].position.y += bposy;
+                      }
+                    }else if(angle==-1){ //xy平面上の左回転
+                        //回転するときの中心の座標を取得
+                        const Oposx = tetromino[0].position.x;
+                        const Oposy = tetromino[0].position.y;
+                        for (let i = 0; i < tetromino.length; i++) {
+                          //中心との差分を取得
+                          tetromino[i].position.x -= Oposx;
+                          tetromino[i].position.y -= Oposy;
+                          //回転
+                          const posx = tetromino[i].position.x;
+                          tetromino[i].position.x = -tetromino[i].position.y;
+                          tetromino[i].position.y = posx;
+                          //中心との差分を足す
+                          tetromino[i].position.x += bposx;
+                          tetromino[i].position.y += bposy;
+                        }
+                    }else{ //xz平面上の回転
+                        //回転するときの中心の座標を取得
+                      const Oposx = tetromino[0].position.x;
+                      const Oposz = tetromino[0].position.z;
+                      for(let i = 0; i < tetromino.length; i++){
+                        //中心との差分を取得
+                        tetromino[i].position.x -= bposx;
+                        tetromino[i].position.z -= bposz;
+                        const posx = tetromino[i].position.x;
+                        const posz = tetromino[i].position.z;
+                        //回転
+                        tetromino[i].position.x = posz;
+                        tetromino[i].position.z = -posx;
+                        //中心との差分を足す
+                        tetromino[i].position.x += bposx;
+                        tetromino[i].position.z += bposz;
+                  
+                      }
+                    }
+                }</code></pre>
+                    </div>
+                    </div>
+                </article>
+                <article id="color">
+                    <h2>色の追加
+                        <span class="toggle-btn" onclick="toggleContent('open9', this)">+</span>
+                    </h2>
+                    <div id="open9" style="display:none;clear:both;">
+                    <p>各テトリミノに異なる色を割り当てることで、ゲームをより視覚的に魅力的にできる。色はランダムに割り当てるようにした。</p>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">コピー</button>
+            <pre><code class="language-javascript">function makeblock() {
+                // 赤、緑、青、黄色の色データ
+                const colordata = [{ r: 1, g: 0, b: 0 }, { r: 0, g: 1, b: 0 }, { r: 0, g: 0, b: 1 }, { r: 1, g: 1, b: 0 }]; 
+                // ランダムに色を選択
+                const color = colordata[Math.floor(Math.random() * colordata.length)];
+                blocksData[Math.floor(Math.random() * blocksData.length)].forEach(block => {
+                const blockGeometry = new THREE.BoxGeometry(blockSize, blockSize, blockSize);
+                // ランダムな色をテトリミノに割り当て
+                const blockMaterial = new THREE.MeshPhongMaterial({
+                color: new THREE.Color(color.r, color.g, color.b)
+                });
+                // ブロックのメッシュを作成
+                const blockMesh = new THREE.Mesh(blockGeometry, blockMaterial);
+                /*
+                ブロックに対する何らかの処理
+                */
+                });
+}</code></pre>
+                    </div>
+                    </div>
+                </article>
+            
+                <article id="judge">
+                    <h2>衝突判定
+                        <span class="toggle-btn" onclick="toggleContent('open10', this)">+</span>
+                    </h2>
+                    <div id="open10" style="display:none;clear:both;">
+                    <p>テトリミノが他のブロックや壁と衝突しないようにするために、衝突判定が必要である。テトリミノは複数の立方体で表せるため、立方体それぞれに対して判定を行った。</p>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">コピー</button>
+            <pre><code class="language-javascript">function checkCollision(tetromino, gameBoard) {
+    // 各ブロックごとに接触を判定
+    var posy1 = -1; //tetrominoのy座標
+    var posy2 = -1; //falledblockのy座標
+    for(let i = 0; i < tetromino.length; i++){
+        for(let j = 0; j < falledblock.length; j++){
+            if(posy1!=-1) continue;
+            if(tetromino[i].position.x==falledblock[j].position.x&&tetromino[i].position.z==falledblock[j].position.z){ //x座標とz座標が一致
+                if(tetromino[i].position.y-falledblock[j].position.y<=blockSize){ //y座標の差がblockSize以下
+                    posy1 = tetromino[i].position.y;
+                    posy2 = falledblock[j].position.y;
+                }
+            }
+        }
+    }
+    if(posy1!=-1){ //tetrominoがfalledblockに接触
+        for(let i = 0; i < tetromino.length; i++){
+            scene.remove(tetromino[i]); //tetrominoを削除
+            const blockMesh = tetromino[i]; //falledblockに追加
+            blockMesh.position.y -= posy1-posy2; //y座標を調整
+            blockMesh.position.y += blockSize; //blockSize分上に移動
+            scene.add(blockMesh); //sceneに追加
+            blockMesh.position.x = Math.round(blockMesh.position.x/blockSize)*blockSize; //x座標を調整
+            blockMesh.position.z = Math.round(blockMesh.position.z/blockSize)*blockSize; //z座標を調整
+            blockMesh.position.y = Math.round(blockMesh.position.y/blockSize)*blockSize; //y座標を調整
+            falledblock.push(blockMesh); //falledblockに追加
+        }
+        tetromino.splice(0,tetromino.length); //tetrominoを削除
+    }
+    posy1 = -1;
+    for(let i = 0; i < tetromino.length; i++){
+        if(posy1!=-1) continue; 
+        if(tetromino[i].position.y<=-caseSize*3/4+blockSize/2){ //tetrominoが床に接触
+        posy1 = tetromino[i].position.y; //y座標を取得
+        }
+    }
+    if(posy1!=-1){ //床に接触
+        for(let i = 0; i < tetromino.length; i++){
+            scene.remove(tetromino[i]);
+            const blockMesh = tetromino[i];
+            blockMesh.position.y -= posy1+(caseSize*3/4+blockSize/2);
+            blockMesh.position.y += blockSize;
+            blockMesh.position.x = Math.round(blockMesh.position.x/blockSize)*blockSize;
+            blockMesh.position.z = Math.round(blockMesh.position.z/blockSize)*blockSize;
+            blockMesh.position.y = Math.round(blockMesh.position.y/blockSize)*blockSize;
+            scene.add(blockMesh);
+            falledblock.push(blockMesh);
+        }
+        tetromino.splice(0,tetromino.length);
+    }
+            </code></pre>
+                    </div>
+                    </div>
+                </article>
+            
+                <article id="in">
+                    <h2>ユーザー入力の処理
+                        <span class="toggle-btn" onclick="toggleContent('open11', this)">+</span>
+                    </h2>
+                    <div id="open11" style="display:none;clear:both;">
+                <p>キーボード入力を使って、テトリミノの移動や回転を制御する。具体的には、WASDでテトリミノの移動、Q,Eでテトリミノの回転を行うように設定した。</p>
+                    <div class="code-block">
+                        <button class="copy-button" onclick="copyCode(this)">コピー</button>
+            <pre><code class="language-javascript">document.addEventListener('keydown', (event) => {
+    const keyName = event.key; // 押されたキーの名前を取得
+    const moveDistance = blockSize; // テトリミノの移動距離
+    switch (keyName) { // キーに応じて処理を分岐
+    case 'w': // Wキー
+        if(wside-blockSize/2>=-(caseSize/2-blockSize/2)){ // 移動可能な範囲内かチェック
+            for (let i = 0; i < fallingblockmesh.length; i++) {
+                fallingblockmesh[i].position.z -= moveDistance; // テトリミノを移動
+            }
+        }
+        break; // 処理を終了
+    case 's': // Sキー
+        if(sside+blockSize/2<=caseSize/2-blockSize/2){ // 移動可能な範囲内かチェック
+            for (let i = 0; i < fallingblockmesh.length; i++) {
+                fallingblockmesh[i].position.z += moveDistance; // テトリミノを移動
+            }
+        }
+        break;
+    case 'a': // Aキー
+        if(aside-blockSize/2>=-(caseSize/2-blockSize/2)){ // 移動可能な範囲内かチェック
+            for (let i = 0; i < fallingblockmesh.length; i++) {
+                fallingblockmesh[i].position.x -= moveDistance; // テトリミノを移動
+            }
+        }
+        break;
+    case 'd': // Dキー
+        if(dside+blockSize/2<=caseSize/2-blockSize/2){ // 移動可能な範囲内かチェック
+            for (let i = 0; i < fallingblockmesh.length; i++) { 
+                fallingblockmesh[i].position.x += moveDistance; // テトリミノを移動
+            }
+        }
+        break;
+    case 'q': // Qキー
+        rotateTetromino(-1); // テトリミノを左回転
+        break;
+    case 'e': // Eキー
+        rotateTetromino(1); // テトリミノを右回転
+        break;
+    default: // それ以外のキー
+        break;
+    }
+            });</code></pre>
+                    </div>
+                    </div>
+                </article>
+            
+                <article id="examples">
+                    <h2>3Dテトリスの実装例
+                        <span class="toggle-btn" onclick="toggleContent('open12', this)">+</span>
+                    </h2>
+                    <div id="open12" style="display:none;clear:both;">
+                    <p>three.jsを使ったものの例として、3Dテトリスを作成した。</p>
+                    <style>
+                        canvas {
+                          display: block;
+                        }
+                      </style>
+                      <script type="importmap">
+                        {
+                          "imports": {
+                            "three": "https://cdn.jsdelivr.net/npm/three@0.167.0/build/three.module.js",
+                            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.167.0/examples/jsm/"
+                          }
+                        }
+                      </script>
+                    <div id="demo-container">
+                        <canvas id="myCanvas"></canvas>
+                    </div>
+                    <script type="module">
+                        import * as THREE from "three";
+                        import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+// サイズを指定
+const width = 800;
+const height = 600;
+
+// レンダラーを作成
+const renderer = new THREE.WebGLRenderer({
+  canvas: document.querySelector("#myCanvas"),
+});
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(width, height);
+
+// シーンを作成
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xdddddd);
+
+// カメラを作成
+const camera = new THREE.PerspectiveCamera(45, width / height);
+camera.position.set(0, 0, +1000);
+
+// OrbitControlsを使用する
+const controls = new OrbitControls(camera, renderer.domElement);
+
+// 光源を追加
+const ambientLight = new THREE.AmbientLight(0x404040, 3);
+scene.add(ambientLight);
+
+const directionalLight1 = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight1.position.set(0, 500, 500);
+scene.add(directionalLight1);
+
+const directionalLight2 = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight2.position.set(0, -500, -500);
+scene.add(directionalLight2);
+
+const directionalLight3 = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight3.position.set(500, 500, -500);
+scene.add(directionalLight3);
+
+const directionalLight4 = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight4.position.set(-500, -500, 500);
+scene.add(directionalLight4);
+
+// ケースの面を作成
+const caseSize = 460;
+const blockSize = 46;
+const caseGeometry = new THREE.BoxGeometry(caseSize+blockSize, caseSize*3/2, caseSize+blockSize);
+const caseMaterial = new THREE.MeshBasicMaterial({
+  color: 0xffffff, // 面を白に塗る
+  transparent: true,
+  opacity: 0.5     // 透明度を少し設定（必要なら変更可能）
+});
+const caseMesh = new THREE.Mesh(caseGeometry, caseMaterial);
+scene.add(caseMesh);
+
+// ケースのエッジを作成
+const edgesGeometry = new THREE.EdgesGeometry(caseGeometry); 
+const edgesMaterial = new THREE.LineBasicMaterial({
+  color: 0x0000ff, 
+  linewidth: 2     
+});
+const edgesMesh = new THREE.LineSegments(edgesGeometry, edgesMaterial);
+scene.add(edgesMesh);
+
+// テトリミノの形状を定義するデータ配列
+const blocksData = [];
+blocksData.push([
+  { position: { x: 0, y: 0, z: 0 } },
+  { position: { x: 1, y: 0, z: 0 } },
+  { position: { x: 2, y: 0, z: 0 } },
+  { position: { x: 3, y: 0, z: 0 } }
+]);
+blocksData.push([
+  { position: { x: 0, y: 0, z: 0 } },
+  { position: { x: 1, y: 0, z: 0 } },
+  { position: { x: 0, y: 1, z: 0 } },
+  { position: { x: 1, y: 1, z: 0 } }
+]);
+blocksData.push([
+  { position: { x: 0, y: 0, z: 0 } },
+  { position: { x: 1, y: 0, z: 0 } },
+  { position: { x: 2, y: 0, z: 0 } },
+  { position: { x: 1, y: 1, z: 0 } }
+]);
+blocksData.push([
+  { position: { x: 0, y: 0, z: 0 } },
+  { position: { x: 1, y: 0, z: 0 } },
+  { position: { x: 2, y: 0, z: 0 } },
+  { position: { x: 0, y: 1, z: 0 } }
+]);
+blocksData.push([
+  { position: { x: 0, y: 0, z: 0 } },
+  { position: { x: 1, y: 0, z: 0 } },
+  { position: { x: 2, y: 0, z: 0 } },
+  { position: { x: 2, y: 1, z: 0 } }
+]);
+blocksData.push([
+  { position: { x: 1, y: 0, z: 0 } },
+  { position: { x: 2, y: 0, z: 0 } },
+  { position: { x: 0, y: 1, z: 0 } },
+  { position: { x: 1, y: 1, z: 0 } }
+]);
+blocksData.push([
+  { position: { x: 0, y: 0, z: 0 } },
+  { position: { x: 1, y: 0, z: 0 } },
+  { position: { x: 1, y: 1, z: 0 } },
+  { position: { x: 2, y: 1, z: 0 } }
+]);
+const colordata = [
+  { r: 1, g: 0, b: 0 }, { r: 0, g: 1, b: 0 }, { r: 0, g: 0, b: 1 }, { r: 1, g: 1, b: 0 }
+];
+const falledblockmesh = [];
+const fallingblockmesh = [];
+let  blockpos = [];
+for(let i = 0; i < (caseSize+blockSize)/blockSize; i++){
+  blockpos[i] = [];
+  for(let j = 0; j < caseSize*3/2/blockSize; j++){
+    blockpos[i][j] = [];
+    for(let k = 0; k < (caseSize+blockSize)/blockSize; k++){
+      blockpos[i][j].push(-1);
+    }
+  }
+}
+console.log(blockpos.length);
+console.log(blockpos[0].length);
+console.log(blockpos[0][0].length);
+var aside = caseSize/2+blockSize/2;
+var dside = -(caseSize/2+blockSize/2);
+var wside = caseSize/2+blockSize/2;
+var sside = -(caseSize/2+blockSize/2);
+const fallSpeed = blockSize/60; 
+function keydown(event) {
+  const keyName = event.key;
+  const moveDistance = blockSize;
+  switch (keyName) {
+    case 'w':
+      var can = true;
+      for(let i = 0; i < fallingblockmesh.length; i++){
+        for(let j = 0; j < falledblockmesh.length; j++){
+          if(fallingblockmesh[i].position.x==falledblockmesh[j].position.x&&fallingblockmesh[i].position.z-moveDistance==falledblockmesh[j].position.z){
+            if(fallingblockmesh[i].position.y-falledblockmesh[j].position.y<=blockSize) can = false;
+          }
+        }
+      }
+      if(!can) return;
+      if(wside-blockSize/2>=-(caseSize/2-blockSize/2)){
+        for (let i = 0; i < fallingblockmesh.length; i++) {
+          fallingblockmesh[i].position.z -= moveDistance;
+        }
+      }
+      break;
+    case 's':
+      var can = true;
+      for(let i = 0; i < fallingblockmesh.length; i++){
+        for(let j = 0; j < falledblockmesh.length; j++){
+          if(fallingblockmesh[i].position.x==falledblockmesh[j].position.x&&fallingblockmesh[i].position.z+moveDistance==falledblockmesh[j].position.z){
+            if(fallingblockmesh[i].position.y-falledblockmesh[j].position.y<=blockSize) can = false;
+          }
+        }
+      }
+      if(!can) return;
+      if(sside+blockSize/2<=caseSize/2-blockSize/2){
+        for (let i = 0; i < fallingblockmesh.length; i++) {
+          fallingblockmesh[i].position.z += moveDistance;
+        }
+      }
+      break;
+    case 'a':
+      var can = true;
+      for(let i = 0; i < fallingblockmesh.length; i++){
+        for(let j = 0; j < falledblockmesh.length; j++){
+          if(fallingblockmesh[i].position.x-moveDistance==falledblockmesh[j].position.x&&fallingblockmesh[i].position.z==falledblockmesh[j].position.z){
+            if(fallingblockmesh[i].position.y-falledblockmesh[j].position.y<=blockSize) can = false;
+          }
+        }
+      }
+      if(!can) return;
+      if(aside-blockSize/2>=-(caseSize/2-blockSize/2)){
+        for (let i = 0; i < fallingblockmesh.length; i++) {
+          fallingblockmesh[i].position.x -= moveDistance;
+        }
+      }
+      break;
+    case 'd':
+      var can = true;
+      for(let i = 0; i < fallingblockmesh.length; i++){
+        for(let j = 0; j < falledblockmesh.length; j++){
+          if(fallingblockmesh[i].position.x+moveDistance==falledblockmesh[j].position.x&&fallingblockmesh[i].position.z==falledblockmesh[j].position.z){
+            if(fallingblockmesh[i].position.y-falledblockmesh[j].position.y<=blockSize) can = false;
+          }
+        }
+      }
+      if(!can) return;
+      if(dside+blockSize/2<=caseSize/2-blockSize/2){
+        for (let i = 0; i < fallingblockmesh.length; i++) {
+          fallingblockmesh[i].position.x += moveDistance;
+        }
+      }
+      break;
+    case 'q':
+      rotateTetromino(-1);
+      break;
+    case 'e':
+      rotateTetromino(1);
+      break;
+    default:
+      break;
+  }
+}
+function rotateTetromino(angle) {
+  if(angle==1){
+    const bposx = fallingblockmesh[0].position.x;
+    const bposy = fallingblockmesh[0].position.y;
+    var posxa = [];
+    var posya = [];
+    for (let i = 0; i < fallingblockmesh.length; i++) {
+      var aposx = fallingblockmesh[i].position.x;
+      var aposy = fallingblockmesh[i].position.y;
+      aposx -= bposx;
+      aposy -= bposy;
+      const posx = aposx;
+      aposx = -aposy;
+      aposy = posx;
+      aposx += bposx;
+      aposy += bposy;
+      posxa.push(aposx);
+      posya.push(aposy);
+    }
+    var can = true;
+    for(let i = 0; i < fallingblockmesh.length; i++){
+      if(posxa[i]<-caseSize/2+blockSize/2||posxa[i]>caseSize/2-blockSize/2||posya[i]<-caseSize*3/4+blockSize/2||posya[i]>caseSize*3/4-blockSize/2) can = false;
+      for(let j = 0; j < falledblockmesh.length; j++){
+        if(Math.round(posxa[i]/blockSize)*blockSize==falledblockmesh[j].position.x&&Math.round(posya[i]/blockSize)*blockSize==falledblockmesh[j].position.z) can = false;
+      }
+    }
+    if(!can) return;
+    for (let i = 0; i < fallingblockmesh.length; i++) {
+      fallingblockmesh[i].position.x -= bposx;
+      fallingblockmesh[i].position.y -= bposy;
+      const posx = fallingblockmesh[i].position.x;
+      fallingblockmesh[i].position.x = fallingblockmesh[i].position.y;
+      fallingblockmesh[i].position.y = -posx;
+      fallingblockmesh[i].position.x += bposx;
+      fallingblockmesh[i].position.y += bposy;
+      fallingblockmesh[i].position.x = Math.round(fallingblockmesh[i].position.x/blockSize)*blockSize;
+      fallingblockmesh[i].position.y = Math.round(fallingblockmesh[i].position.y/blockSize)*blockSize;
+    }
+  }else if(angle==-1){
+    const bposx = fallingblockmesh[0].position.x;
+    const bposy = fallingblockmesh[0].position.y;
+    var posxa = [];
+    var posya = [];
+    for (let i = 0; i < fallingblockmesh.length; i++) {
+      var aposx = fallingblockmesh[i].position.x;
+      var aposy = fallingblockmesh[i].position.y;
+      aposx -= bposx;
+      aposy -= bposy;
+      const posx = aposx;
+      aposx = aposy;
+      aposy = -posx;
+      aposx += bposx;
+      aposy += bposy;
+      posxa.push(aposx);
+      posya.push(aposy);
+    }
+    var can = true;
+    for(let i = 0; i < fallingblockmesh.length; i++){
+      if(posxa[i]<-caseSize/2+blockSize/2||posxa[i]>caseSize/2-blockSize/2||posya[i]<-caseSize*3/4+blockSize/2||posya[i]>caseSize*3/4-blockSize/2) can = false;
+      for(let j = 0; j < falledblockmesh.length; j++){
+        if(Math.round(posxa[i]/blockSize)*blockSize==falledblockmesh[j].position.x&&Math.round(posya[i]/blockSize)*blockSize==falledblockmesh[j].position.y) can = false;
+      }
+    }
+    if(!can) return;
+    for (let i = 0; i < fallingblockmesh.length; i++) {
+      fallingblockmesh[i].position.x -= bposx;
+      fallingblockmesh[i].position.y -= bposy;
+      const posx = fallingblockmesh[i].position.x;
+      fallingblockmesh[i].position.x = -fallingblockmesh[i].position.y;
+      fallingblockmesh[i].position.y = posx;
+      fallingblockmesh[i].position.x += bposx;
+      fallingblockmesh[i].position.y += bposy;
+      fallingblockmesh[i].position.x = Math.round(fallingblockmesh[i].position.x/blockSize)*blockSize;
+      fallingblockmesh[i].position.y = Math.round(fallingblockmesh[i].position.y/blockSize)*blockSize;
+    }
+  }else{
+    const bposx = fallingblockmesh[0].position.x;
+    const bposz = fallingblockmesh[0].position.z;
+    for(let i = 0; i < fallingblockmesh.length; i++){
+      fallingblockmesh[i].position.x -= bposx;
+      fallingblockmesh[i].position.z -= bposz;
+      const posx = fallingblockmesh[i].position.x;
+      const posz = fallingblockmesh[i].position.z;
+      fallingblockmesh[i].position.x = posz;
+      fallingblockmesh[i].position.z = -posx;
+      fallingblockmesh[i].position.x += bposx;
+      fallingblockmesh[i].position.z += bposz;
+
+    }
+  }
+}
+function makeblock() {
+  const color = colordata[Math.floor(Math.random() * colordata.length)];
+
+  blocksData[Math.floor(Math.random() * blocksData.length)].forEach(block => {
+    const blockGeometry = new THREE.BoxGeometry(blockSize, blockSize, blockSize);
+      const blockMaterial = new THREE.MeshPhongMaterial({
+      color: new THREE.Color(color.r, color.g, color.b)
+    });
+    const blockMesh = new THREE.Mesh(blockGeometry, blockMaterial);
+    blockMesh.position.set(block.position.x * blockSize, block.position.y * blockSize, block.position.z * blockSize);
+    fallingblockmesh.push(blockMesh);
+    // エッジを追加して境界線をわかりやすくする
+    const edgesGeometry = new THREE.EdgesGeometry(blockGeometry);
+    const edgesMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
+    const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
+    blockMesh.add(edges);
+    scene.add(blockMesh);
+  });
+  // テトリミノを初期位置に設定し、シーンに追加
+  for (let i = 0; i < fallingblockmesh.length; i++) {
+    fallingblockmesh[i].position.y += caseSize*3/4+blockSize/2;
+  }
+  if(Math.random()<0.5){
+    rotateTetromino(2);
+  }
+}
+function eraseblock(){
+  for(let j=0;j<caseSize*3/2/blockSize;j++){
+    let candidatex = [];
+    let candidatez = [];
+    for(let i=0;i<(caseSize+blockSize)/blockSize;i++){
+      var can = true;
+      for(let k=0;k<(caseSize+blockSize)/blockSize;k++){
+        if(blockpos[i][j][k]==-1) can = false;
+      }
+      if(can){
+        candidatez.push(i);
+      }
+    }
+    for(let k=0;k<(caseSize+blockSize)/blockSize;k++){
+      var can = true;
+      for(let i=0;i<(caseSize+blockSize)/blockSize;i++){
+        if(blockpos[i][j][k]==-1) can = false;
+      }
+      if(can){
+        candidatex.push(k);
+      }
+    }
+    for(let i=0;i<candidatex.length;i++){
+      for(let k=0;k<(caseSize+blockSize)/blockSize;k++){
+        scene.remove(falledblockmesh[blockpos[k][j][candidatex[i]]]);
+        falledblockmesh.splice(blockpos[k][j][candidatex[i]],1);
+        for(let l=0;l<(caseSize+blockSize)/blockSize;l++){
+          for(let m=0;m<caseSize*3/2/blockSize;m++){
+            for(let n=0;n<(caseSize+blockSize)/blockSize;n++){
+              if(blockpos[l][m][n]>blockpos[k][j][candidatex[i]]){
+                blockpos[l][m][n]--;
+              }
+            }
+          }
+        }
+        blockpos[k][j][candidatex[i]] = -1;
+      }
+    }
+    for(let i=0;i<candidatez.length;i++){
+      for(let k=0;k<(caseSize+blockSize)/blockSize;k++){
+        scene.remove(falledblockmesh[blockpos[candidatez[i]][j][k]]);
+        falledblockmesh.splice(blockpos[candidatez[i]][j][k],1);
+        for(let l=0;l<(caseSize+blockSize)/blockSize;l++){
+          for(let m=0;m<caseSize*3/2/blockSize;m++){
+            for(let n=0;n<(caseSize+blockSize)/blockSize;n++){
+              if(blockpos[l][m][n]>blockpos[candidatez[i]][j][k]){
+                blockpos[l][m][n]--;
+              }
+            }
+          }
+        }
+        blockpos[candidatez[i]][j][k] = -1;
+      }
+    }
+    for(let m=j+1;m<caseSize*3/2/blockSize;m++){
+      if(m==caseSize*3/2/blockSize-1){
+        for(let i=0;i<candidatex.length;i++){
+          for(let k=0;k<(caseSize+blockSize)/blockSize;k++){
+            blockpos[k][m-1][candidatex[i]] = -1;
+          }
+        }
+      }else{
+        for(let i=0;i<candidatex.length;i++){
+          for(let k=0;k<(caseSize+blockSize)/blockSize;k++){
+            blockpos[k][m-1][candidatex[i]] = blockpos[k][m][candidatex[i]];
+          }
+        }
+      }
+    }
+    for(let m=j+1;m<caseSize*3/2/blockSize;m++){
+      if(m==caseSize*3/2/blockSize-1){
+        for(let i=0;i<candidatez.length;i++){
+          for(let k=0;k<(caseSize+blockSize)/blockSize;k++){
+            blockpos[candidatez[i]][m-1][k] = -1;
+          }
+        }
+      }else{
+        for(let i=0;i<candidatez.length;i++){
+          for(let k=0;k<(caseSize+blockSize)/blockSize;k++){
+            blockpos[candidatez[i]][m-1][k] = blockpos[candidatez[i]][m][k];
+          }
+        }
+      }
+    }
+  }
+  for(let i=0;i<blockpos.length;i++){
+    for(let j=0;j<blockpos[i].length;j++){
+      for(let k=0;k<blockpos[i][j].length;k++){
+        if(blockpos[i][j][k]!=-1){
+          falledblockmesh[blockpos[i][j][k]].position.y = j*blockSize-caseSize*3/4+blockSize/2;
+        }
+      } 
+    }
+  }
+}
+
+makeblock();
+// アニメーションループ
+function animate() {
+  requestAnimationFrame(animate);
+  // ブロックがない場合は新たに作成
+  if (fallingblockmesh.length === 0) {
+    makeblock();
+  }
+  var maxy = -1e9;
+  for(let i=0;i<falledblockmesh.length;i++){
+    maxy = Math.max(maxy,falledblockmesh[i].position.y);
+  }
+  if(maxy+blockSize/2>=caseSize*3/4){
+    for(let i=0;i<falledblockmesh.length;i++){
+      scene.remove(falledblockmesh[i]);
+    }
+    falledblockmesh.splice(0,falledblockmesh.length);
+    for(let i=0;i<blockpos.length;i++){
+      for(let j=0;j<blockpos[i].length;j++){
+        for(let k=0;k<blockpos[i][j].length;k++){
+          blockpos[i][j][k] = -1;
+        }
+      }
+    }
+  }
+  aside = caseSize/2+blockSize/2;
+  dside = -(caseSize/2+blockSize/2);
+  wside = (caseSize/2+blockSize/2);
+  sside = -(caseSize/2+blockSize/2);
+  for(let i = 0; i < fallingblockmesh.length; i++){
+    aside = Math.min(aside,fallingblockmesh[i].position.x);
+    dside = Math.max(dside,fallingblockmesh[i].position.x);
+    wside = Math.min(wside,fallingblockmesh[i].position.z);
+    sside = Math.max(sside,fallingblockmesh[i].position.z);
+  } 
+  document.addEventListener('keydown', keydown);
+  // 落下速度に基づいてブロックの位置を更新
+  for (let i = 0; i < fallingblockmesh.length; i++) {
+    fallingblockmesh[i].position.y -= fallSpeed*2;
+  }
+  // 各ブロックごとに接触を判定
+  var posy1 = -1;
+  var posy2 = -1;
+  for(let i = 0; i < fallingblockmesh.length; i++){
+    for(let j = 0; j < falledblockmesh.length; j++){
+      if(posy1!=-1) continue;
+      if(fallingblockmesh[i].position.x==falledblockmesh[j].position.x&&fallingblockmesh[i].position.z==falledblockmesh[j].position.z){
+        if(fallingblockmesh[i].position.y-falledblockmesh[j].position.y<=blockSize){
+          posy1 = fallingblockmesh[i].position.y;
+          posy2 = falledblockmesh[j].position.y;
+        }
+      }
+    }
+  }
+  if(posy1!=-1){
+    for(let i = 0; i < fallingblockmesh.length; i++){
+      scene.remove(fallingblockmesh[i]);
+      const blockMesh = fallingblockmesh[i];
+      blockMesh.position.y -= posy1-posy2;
+      blockMesh.position.y += blockSize;
+      scene.add(blockMesh);
+      blockMesh.position.x = Math.round(blockMesh.position.x/blockSize)*blockSize;
+      blockMesh.position.z = Math.round(blockMesh.position.z/blockSize)*blockSize;
+      blockMesh.position.y = Math.round(blockMesh.position.y/blockSize)*blockSize;
+      falledblockmesh.push(blockMesh);
+      blockpos[Math.floor((blockMesh.position.x+(caseSize+blockSize)/2)/blockSize)][Math.floor((blockMesh.position.y+caseSize*3/4)/blockSize)][Math.floor((blockMesh.position.z+(caseSize+blockSize)/2)/blockSize)] = falledblockmesh.length-1;
+      console.log(blockpos[Math.floor((blockMesh.position.x+(caseSize+blockSize)/2)/blockSize)][Math.floor((blockMesh.position.y+caseSize*3/4)/blockSize)][Math.floor((blockMesh.position.z+(caseSize+blockSize)/2)/blockSize)]);
+    }
+    fallingblockmesh.splice(0,fallingblockmesh.length);
+    eraseblock();
+    for(let i=0;i<blockpos.length;i++){
+      for(let j=0;j<blockpos[i].length;j++){
+        for(let k=0;k<blockpos[i][j].length;k++){
+          if(blockpos[i][j][k]!=-1){
+            console.log(1);
+          }else console.log(0);
+        }
+      }
+    }
+  }
+  posy1 = -1;
+  for(let i = 0; i < fallingblockmesh.length; i++){
+    if(posy1!=-1) continue;
+    if(fallingblockmesh[i].position.y<=-caseSize*3/4+blockSize/2){
+      posy1 = fallingblockmesh[i].position.y;
+    }
+  }
+  if(posy1!=-1){
+    for(let i = 0; i < fallingblockmesh.length; i++){
+      scene.remove(fallingblockmesh[i]);
+      const blockMesh = fallingblockmesh[i];
+      blockMesh.position.y -= posy1+(caseSize*3/4+blockSize/2);
+      blockMesh.position.y += blockSize;
+      blockMesh.position.x = Math.round(blockMesh.position.x/blockSize)*blockSize;
+      blockMesh.position.z = Math.round(blockMesh.position.z/blockSize)*blockSize;
+      blockMesh.position.y = Math.round(blockMesh.position.y/blockSize)*blockSize;
+      scene.add(blockMesh);
+      falledblockmesh.push(blockMesh);
+      blockpos[Math.floor((blockMesh.position.x+(caseSize+blockSize)/2)/blockSize)][Math.floor((blockMesh.position.y+caseSize*3/4)/blockSize)][Math.floor((blockMesh.position.z+(caseSize+blockSize)/2)/blockSize)] = falledblockmesh.length-1;
+      console.log(blockpos[Math.floor((blockMesh.position.x+(caseSize+blockSize)/2)/blockSize)][Math.floor((blockMesh.position.y+caseSize*3/4)/blockSize)][Math.floor((blockMesh.position.z+(caseSize+blockSize)/2)/blockSize)]);
+    }
+    fallingblockmesh.splice(0,fallingblockmesh.length);
+    eraseblock();
+    for(let i=0;i<blockpos.length;i++){
+    for(let j=0;j<blockpos[i].length;j++){
+      for(let k=0;k<blockpos[i][j].length;k++){
+        if(blockpos[i][j][k]!=-1){
+          console.log(1);
+        }else console.log(0);
+      }
+    }
+  }
+  }
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+// 初回のアニメーション呼び出し
+animate();
+
+// リサイズ対応
+window.addEventListener('resize', () => {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  renderer.setSize(width, height);
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+});
+                    </script>
+                    </div>
+                    <p>この例では、3Dテトリスを実装した。テトリミノの生成、落下、衝突判定、ロック（固定）などのテトリスにある基本的な機能を実装した。</p>
+                </article>
+            </section>
+            <section id="time">
+                <h2>本コンテンツの作成時間</h2>
+                <p>約12時間</p>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Three.js 技術解説. All rights reserved.</p>
+    </footer>
+</body>
+</html>
